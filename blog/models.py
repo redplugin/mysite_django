@@ -1,12 +1,18 @@
-from django.db import models
-from django.contrib.auth.models import User
+from datetime import datetime, timedelta
 
-from django.db.models import CheckConstraint
-from django.db.models import Q
+from django.contrib.auth.models import User
+from django.db import models
+
+
+class NewPostManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(created_at__gt=datetime.now()-timedelta(hours=24))
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=64, unique=True)
+
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -15,34 +21,47 @@ class Category(models.Model):
 
 class Post(models.Model):
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, db_index=True)
     content = models.TextField()
-    categories = models.ManyToManyField(Category, related_name="posts")  # linked to CATEGORIES
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    categories = models.ManyToManyField(Category)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    new_posts = NewPostManager()
+    objects = models.Manager()
 
     def __str__(self):
         return f"{self.title} ({self.pk})"
 
     class Meta:
-        constraints = [
-            CheckConstraint(
-                check=Q(title__startswith='Hello'),  # Ensure the title starts with "Hello"
-                name='post_title_must_start_with_hello'  # Give the constraint a descriptive name
-            )
+        db_table = 'posts'
+        ordering = ['title']
+        unique_together = ('title', 'content')
+        indexes = [
+            models.Index(fields=['title', 'content']),  # compound indexes
         ]
+        default_related_name = 'posts'
 
 
 class Comment(models.Model):
 
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.content} ({self.pk})"
+
+
+class TestUser(models.Model):
+    name = models.CharField(max_length=30)
+    age = models.IntegerField(default=18)
+
+
+    def __str__(self):
+        return f"{self.name}"
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog</title>
+</head>
+<body>
+    <ul>
+        {% for post in all_posts %}
+        <li>
+<!--            <a href="/blog/posts/{{post.id}}">{{ post.title }}</a>-->
+            <a href="{% url 'detail' post.id %}">{{ post.title }}</a>
+        </li>
+<!--        <li>{{ post.content }}</li>-->
+<!--        <br/>-->
+        {% endfor %}
+    </ul>
+</body>
+</html>
