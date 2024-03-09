@@ -7,6 +7,21 @@
 <body>
     <h1> id: {{ post.id }}. {{ post.title }} </h1>
     <p> {{ post.content }} </p>
-    <p>This is a separate html template.</p>
+    <br>
+    {% if comments %}
+        <p>Comments:</p>
+        <ul>
+            {% for comment in comments %}
+                <li>{{ comment.content }} (by {{ comment.author }})</li>
+            {% endfor %}
+        </ul>
+        <br>
+    {% endif %}
+    <p>Write a comment:</p>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>

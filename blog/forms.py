@@ -1,6 +1,6 @@
 from django import forms
 
-from blog.models import Post
+from blog.models import Post, Comment
 
 
 class CreatePostForm(forms.ModelForm):
@@ -12,5 +12,11 @@ class CreatePostForm(forms.ModelForm):
         fields = ['title', 'content', 'categories']
         # fields = '__all__'
         # exclude = ['created_at', 'updated_at']
+
+
+class CreateCommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content', 'author']
 
 
